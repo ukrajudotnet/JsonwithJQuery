@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="Scripts/jquery-1.8.2.min.js"></script>
+    <title></title>
+    <script type="text/javascript">
+        var sort_by = function (field, reverse, primer) {
+
+            var key = primer ?
+                function (x) { return primer(x[field]) } :
+                function (x) { return x[field] };
+
+            reverse = !reverse ? 1 : -1;
+
+            return function (a, b) {
+                return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
+            }
+        }
+
+        $(document).ready(function () {
+
+            $.getJSON("data/people.json", function (data) {
+                WriteResponse(data);
+            });
+
+            //$.ajax({
+            //    url: 'http://agl-developer-test.azurewebsites.net/people.json',
+            //    type: 'Get',
+            //    dataType: 'json',
+            //    success: function (data) {
+            //        WriteResponse(data);
+            //    },
+            //    error: function (x, y, z) {
+            //        alert(x + '\n' + y + '\n' + z);
+            //    }
+            //});
+        });
+
+        function WriteResponse(peopleData) {
+            // Sort by city, case-insensitive, A-Z
+            peopleData.sort(sort_by('name', false, function (a) { return a.toUpperCase() }));
+            var items = [];
+            var maleItems = [];
+            $.each(peopleData, function (key, val) {
+                //Check pets data
+                if (val.pets != null) {
+                    $.each(val.pets, function (index, pet) {
+                        if (pet.type == "Cat") {
+                            return;
+                        }
+                    })
+
+                    //Check gender
+                    if (val.gender == "Male") {
+                        //Add to Male
+                        maleItems.push("<li id='" + key + "'>" + val.name + "</li>");
+                    }
+                    else {
+                        //Add to Female list
+                        items.push("<li id='" + key + "'>" + val.name + "</li>");
+                    }
+                }
+
+            });
+
+            $("<ul/>", {
+                "class": "my-new-list",
+                html: maleItems.join("")
+            }).appendTo("#divMale");
+
+            $("<ul/>", {
+                "class": "my-new-list",
+                html: items.join("")
+            }).appendTo("#divFemale");
+        }
+    </script>
+</head>
+<body>
+    <div id="divMale"><h3>Male</h3></div>
+    <div id="divFemale"><h3>Female</h3></div>
+</body>
+</html>
